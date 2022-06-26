@@ -17,6 +17,7 @@ import {
 import { CustomExceptionFilter } from 'src/exception/custom-exception';
 import { IsObjectIdParam } from 'src/custom-decorators/validation-mongoose.object-id';
 import { ObjectId } from 'mongoose';
+import { MongoId } from 'src/mongoose.interface';
 
 @UseFilters(CustomExceptionFilter)
 @Controller('comment')
@@ -37,20 +38,20 @@ export class CommentController {
 
   @Get('get/:id')
   @HttpCode(200)
-  findOne(@IsObjectIdParam() id: ObjectId) {
+  findOne(@IsObjectIdParam() id: MongoId) {
     return this.commentService.findOne(id);
   }
 
   @UsePipes(CustomValidationPipe)
   @Patch('update/:id')
   @HttpCode(200)
-  update(@IsObjectIdParam() id: ObjectId, @Body() dto: UpdateCommentDto) {
+  update(@IsObjectIdParam() id: MongoId, @Body() dto: UpdateCommentDto) {
     return this.commentService.update(id, dto);
   }
 
   @Delete('delete/:id')
   @HttpCode(200)
-  deleteOne(@IsObjectIdParam() id: ObjectId) {
+  deleteOne(@IsObjectIdParam() id: MongoId) {
     return this.commentService.deleteOne(id);
   }
 }

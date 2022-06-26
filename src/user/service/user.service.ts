@@ -9,6 +9,7 @@ import { IUserModel } from '../model/user.interface';
 import { UserModel } from '../model/user.model';
 import { UserEntity } from '../entity/user.entity';
 import { ObjectId } from 'mongoose';
+import { MongoId } from 'src/mongoose.interface';
 @Injectable()
 export class UserService {
   constructor(
@@ -38,7 +39,7 @@ export class UserService {
     return createClassesObject(UserEntity, allUsers) as UserEntity[];
   }
 
-  async findById(id: ObjectId) {
+  async findById(id: MongoId) {
     const user = await this.userModel.findById(id);
     if (!user) {
       throw new ApiError(
@@ -62,7 +63,7 @@ export class UserService {
     return new UserEntity(user);
   }
 
-  async update(id: ObjectId, dto: UpdateUserDto) {
+  async update(id: MongoId, dto: UpdateUserDto) {
     const updatedUser = await this.userModel.findByIdAndUpdate(id, dto);
     if (!updatedUser) {
       throw new ApiError(
@@ -74,7 +75,7 @@ export class UserService {
     return new UserEntity(updatedUser);
   }
 
-  async deleteOne(id: ObjectId) {
+  async deleteOne(id: MongoId) {
     const deletedUser = await this.userModel.findByIdAndRemove(id);
     if (!deletedUser) {
       throw new ApiError(

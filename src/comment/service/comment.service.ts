@@ -9,6 +9,7 @@ import { Model, ObjectId } from 'mongoose';
 import { CommentModelDocument } from '../model/comment.model';
 import { ApiError } from 'src/error/custom-error';
 import { TYPE_ERROR } from 'src/error/custom-error.interface';
+import { MongoId } from 'src/mongoose.interface';
 @Injectable()
 export class CommentService {
   constructor(
@@ -38,7 +39,7 @@ export class CommentService {
     return createClassesObject(CommentEntity, allComments) as CommentEntity[];
   }
 
-  async findOne(id: ObjectId) {
+  async findOne(id: MongoId) {
     const comment = await this.commentModel.findById(id);
     if (!comment)
       throw new ApiError(
@@ -49,7 +50,7 @@ export class CommentService {
     return new CommentEntity(comment);
   }
 
-  async update(id: ObjectId, dto: UpdateCommentDto) {
+  async update(id: MongoId, dto: UpdateCommentDto) {
     const comment = await this.commentModel.findByIdAndUpdate(id, dto, {
       new: true,
     });
@@ -62,7 +63,7 @@ export class CommentService {
     return new CommentEntity(comment);
   }
 
-  async deleteOne(id: ObjectId) {
+  async deleteOne(id: MongoId) {
     const deletedComment = await this.commentModel.findByIdAndRemove(id);
     if (!deletedComment)
       throw new ApiError(

@@ -16,6 +16,7 @@ import {
 import { CustomValidationPipe } from 'src/validation-pipe/custom-validation-pipe';
 import { CustomExceptionFilter } from 'src/exception/custom-exception';
 import { IsObjectIdParam } from 'src/custom-decorators/validation-mongoose.object-id';
+import { MongoId } from 'src/mongoose.interface';
 
 @UseFilters(CustomExceptionFilter)
 @Controller('user')
@@ -34,20 +35,17 @@ export class UserController {
   }
 
   @Get(':id')
-  findOne(@IsObjectIdParam() id: ObjectId) {
+  findOne(@IsObjectIdParam() id: MongoId) {
     return this.userService.findById(id);
   }
 
   @Patch(':id')
-  update(
-    @IsObjectIdParam() id: ObjectId,
-    @Body() updateUserDto: UpdateUserDto,
-  ) {
+  update(@IsObjectIdParam() id: MongoId, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(id, updateUserDto);
   }
 
   @Delete(':id')
-  remove(@IsObjectIdParam() id: ObjectId) {
+  remove(@IsObjectIdParam() id: MongoId) {
     return this.userService.deleteOne(id);
   }
 }

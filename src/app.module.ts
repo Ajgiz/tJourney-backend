@@ -1,3 +1,4 @@
+import { ConfigModule } from '@nestjs/config';
 import { CommentModule } from './comment/comment.module';
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -13,6 +14,9 @@ import { AuthModule } from './auth/auth.module';
     PostModule,
     CommentModule,
     AuthModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],

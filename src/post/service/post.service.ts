@@ -9,6 +9,7 @@ import { PostEntity } from '../entity/post.entity';
 import { TYPE_ERROR } from 'src/error/custom-error.interface';
 import { createClassesObject } from 'src/common/helper-function';
 import { SearchPostDto } from '../dto/search-post.dto';
+import { MongoId } from 'src/mongoose.interface';
 
 @Injectable()
 export class PostService {
@@ -80,7 +81,7 @@ export class PostService {
     return createClassesObject(PostEntity, allPosts) as PostEntity[];
   }
 
-  async findOne(id: ObjectId) {
+  async findOne(id: MongoId) {
     const post = await this.postModel.findById(id);
     if (!post)
       throw new ApiError(
@@ -91,7 +92,7 @@ export class PostService {
     return new PostEntity(await this.incrementViews(post._id));
   }
 
-  async incrementViews(id: ObjectId) {
+  async incrementViews(id: MongoId) {
     return await this.postModel.findByIdAndUpdate(
       id,
       { $inc: { views: 1 } },
@@ -99,7 +100,7 @@ export class PostService {
     );
   }
 
-  async update(id: ObjectId, dto: UpdatePostDto) {
+  async update(id: MongoId, dto: UpdatePostDto) {
     const post = await this.postModel.findByIdAndUpdate(id, dto, { new: true });
     if (!post)
       throw new ApiError(
@@ -110,7 +111,7 @@ export class PostService {
     return new PostEntity(post);
   }
 
-  async deleteOne(id: ObjectId) {
+  async deleteOne(id: MongoId) {
     const removedPost = await this.postModel.findByIdAndRemove(id);
     return new PostEntity(removedPost);
   }

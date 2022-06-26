@@ -19,6 +19,7 @@ import { ObjectId } from 'mongoose';
 import { CustomValidationPipe } from 'src/validation-pipe/custom-validation-pipe';
 import { CustomExceptionFilter } from 'src/exception/custom-exception';
 import { IsObjectIdParam } from 'src/custom-decorators/validation-mongoose.object-id';
+import { MongoId } from 'src/mongoose.interface';
 
 @UseFilters(CustomExceptionFilter)
 @Controller('post')
@@ -56,22 +57,19 @@ export class PostController {
 
   @Get(':id')
   @HttpCode(200)
-  findOne(@IsObjectIdParam() id: ObjectId) {
+  findOne(@IsObjectIdParam() id: MongoId) {
     return this.postService.findOne(id);
   }
 
   @Patch(':id')
   @HttpCode(200)
-  update(
-    @IsObjectIdParam() id: ObjectId,
-    @Body() updatePostDto: UpdatePostDto,
-  ) {
+  update(@IsObjectIdParam() id: MongoId, @Body() updatePostDto: UpdatePostDto) {
     return this.postService.update(id, updatePostDto);
   }
 
   @Delete(':id')
   @HttpCode(200)
-  deleteOne(@IsObjectIdParam() id: ObjectId) {
+  deleteOne(@IsObjectIdParam() id: MongoId) {
     return this.postService.deleteOne(id);
   }
 }

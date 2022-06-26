@@ -10,6 +10,4 @@ export class CreatePostDto {
   @IsString({ each: true })
   @IsArray()
   tags: string[];
-
-  views: any;
 }
