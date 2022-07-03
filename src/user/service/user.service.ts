@@ -1,6 +1,6 @@
-import { createClassesObject } from 'src/common/helper-function';
+import { createClassesObject } from '../../common/helper-function';
 import { TYPE_ERROR } from '../../error/custom-error.interface';
-import { ApiError } from 'src/error/custom-error';
+import { ApiError } from '../../error/custom-error';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { CreateUserDto } from '../dto/create-user.dto';
@@ -8,8 +8,8 @@ import { UpdateUserDto } from '../dto/update-user.dto';
 import { IUserModel } from '../model/user.interface';
 import { UserModel } from '../model/user.model';
 import { UserEntity } from '../entity/user.entity';
-import { ObjectId } from 'mongoose';
-import { MongoId } from 'src/mongoose.interface';
+import { MongoId } from '../../mongoose.interface';
+
 @Injectable()
 export class UserService {
   constructor(
@@ -52,19 +52,13 @@ export class UserService {
   }
 
   async findOne(dto: UpdateUserDto) {
-    const user = await this.userModel.findOne(dto);
-    if (!user) {
-      throw new ApiError(
-        404,
-        { response: 'user not found' },
-        TYPE_ERROR.NOT_FOUND,
-      );
-    }
-    return new UserEntity(user);
+    return await this.userModel.findOne(dto);
   }
 
   async update(id: MongoId, dto: UpdateUserDto) {
-    const updatedUser = await this.userModel.findByIdAndUpdate(id, dto);
+    const updatedUser = await this.userModel.findByIdAndUpdate(id, dto, {
+      new: true,
+    });
     if (!updatedUser) {
       throw new ApiError(
         404,

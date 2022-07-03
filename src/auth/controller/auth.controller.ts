@@ -1,12 +1,9 @@
-import { CustomValidationPipe } from 'src/validation-pipe/custom-validation-pipe';
+import { CustomValidationPipe } from '../../validation-pipe/custom-validation-pipe';
 import {
   Controller,
   Get,
   Post,
   Body,
-  Patch,
-  Param,
-  Delete,
   UsePipes,
   UseFilters,
   Req,
@@ -15,10 +12,12 @@ import {
 } from '@nestjs/common';
 import { AuthService } from '../service/auth.service';
 import { AuthLoginDto } from '../dto/login-auth.dto';
-import { CustomExceptionFilter } from 'src/exception/custom-exception';
+import { CustomExceptionFilter } from '../../exception/custom-exception';
 import { Request, Response } from 'express';
 import { AuthRegisterDto } from '../dto/register-auth.dto';
 import { JwtAuthGuard } from '../guards/jwt-guards';
+import { ApiError } from 'src/error/custom-error';
+import { TYPE_ERROR } from 'src/error/custom-error.interface';
 
 @UseFilters(CustomExceptionFilter)
 @Controller('auth')
@@ -27,38 +26,27 @@ export class AuthController {
 
   @UsePipes(CustomValidationPipe)
   @Post('login')
-  async login(
-    @Body() data: AuthLoginDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const userData = await this.authService.login(data);
-    const { refreshToken, ...response } = userData;
-    res.cookie('refreshToken', refreshToken);
-    return response;
+  async login(@Body() data: AuthLoginDto) {
+    return await this.authService.login(data);
   }
 
   @UsePipes(CustomValidationPipe)
   @Post('register')
-  async register(
-    @Body() data: AuthRegisterDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const userData = await this.authService.register(data);
-    const { refreshToken, ...response } = userData;
-    res.cookie('refreshToken', refreshToken);
-    return response;
+  async register(@Body() data: AuthRegisterDto) {
+    return await this.authService.register(data);
   }
 
-  @Post('refresh')
-  async refresh(
-    @Res({ passthrough: true }) res: Response,
-    @Req() req: Request,
-  ) {
-    const { refreshToken } = req.cookies;
-    const userData = await this.authService.refreshToken(refreshToken);
-    const { refreshToken: token, ...response } = userData;
-    res.cookie('refreshToken', token);
-    return response;
+  @Get('refresh')
+  async refresh(@Req() req: Request) {
+    if (req.cookies?.refreshToken) {
+      const { refreshToken } = req.cookies;
+      return await this.authService.refreshToken(refreshToken);
+    } else
+      throw new ApiError(
+        401,
+        { response: 'not authorized' },
+        TYPE_ERROR.UNAUTHORIZED,
+      );
   }
 
   @UseGuards(JwtAuthGuard)
@@ -66,7 +54,6 @@ export class AuthController {
   async logout(@Res({ passthrough: true }) res: Response, @Req() req: Request) {
     const { refreshToken } = req.cookies;
     const token = await this.authService.logout(refreshToken);
-    res.clearCookie('refreshToken');
     return token;
   }
 }

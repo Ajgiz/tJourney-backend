@@ -1,4 +1,4 @@
-import { createClassesObject } from 'src/common/helper-function';
+import { createClassesObject } from '../../common/helper-function';
 import { CommentEntity } from './../entity/comment.entity';
 import { CommentModel } from './../model/comment.model';
 import { Injectable } from '@nestjs/common';
@@ -7,9 +7,9 @@ import { CreateCommentDto } from '../dto/create-comment.dto';
 import { UpdateCommentDto } from '../dto/update-comment.dto';
 import { Model, ObjectId } from 'mongoose';
 import { CommentModelDocument } from '../model/comment.model';
-import { ApiError } from 'src/error/custom-error';
-import { TYPE_ERROR } from 'src/error/custom-error.interface';
-import { MongoId } from 'src/mongoose.interface';
+import { ApiError } from '../../error/custom-error';
+import { TYPE_ERROR } from '../../error/custom-error.interface';
+import { MongoId } from '../../mongoose.interface';
 @Injectable()
 export class CommentService {
   constructor(

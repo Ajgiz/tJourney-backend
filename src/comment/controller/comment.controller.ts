@@ -7,17 +7,15 @@ import {
   Post,
   Body,
   Get,
-  Param,
   Patch,
   Delete,
   UseFilters,
   UsePipes,
   HttpCode,
 } from '@nestjs/common';
-import { CustomExceptionFilter } from 'src/exception/custom-exception';
-import { IsObjectIdParam } from 'src/custom-decorators/validation-mongoose.object-id';
-import { ObjectId } from 'mongoose';
-import { MongoId } from 'src/mongoose.interface';
+import { CustomExceptionFilter } from '../../exception/custom-exception';
+import { IsObjectIdParam } from '../../custom-decorators/validation-mongoose.object-id.decorator';
+import { MongoId } from '../../mongoose.interface';
 
 @UseFilters(CustomExceptionFilter)
 @Controller('comment')

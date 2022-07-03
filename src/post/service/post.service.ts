@@ -1,15 +1,15 @@
-import { ObjectId, Model } from 'mongoose';
-import { ApiError } from 'src/error/custom-error';
+import { Model } from 'mongoose';
+import { ApiError } from '../../error/custom-error';
 import { PostModel, PostModelDocument } from './../model/post.model';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { CreatePostDto } from '../dto/create-post.dto';
 import { UpdatePostDto } from '../dto/update-post.dto';
 import { PostEntity } from '../entity/post.entity';
-import { TYPE_ERROR } from 'src/error/custom-error.interface';
-import { createClassesObject } from 'src/common/helper-function';
+import { TYPE_ERROR } from '../../error/custom-error.interface';
+import { createClassesObject } from '../../common/helper-function';
 import { SearchPostDto } from '../dto/search-post.dto';
-import { MongoId } from 'src/mongoose.interface';
+import { MongoId } from '../../mongoose.interface';
 
 @Injectable()
 export class PostService {
@@ -48,7 +48,7 @@ export class PostService {
     const queryParams: { [key: string]: any } = {};
     const sortParams: { [key: string]: any } = {};
     if (dto.views) {
-      sortParams.views = dto.views;
+      sortParams.views = dto.views; //1 или -1
     }
     if (dto.new) {
       sortParams.$natural = dto.new;
@@ -61,6 +61,7 @@ export class PostService {
       .limit(dto.limit || 10)
       .skip(dto.take || 0)
       .sort(sortParams);
+
     if (!posts)
       throw new ApiError(
         404,

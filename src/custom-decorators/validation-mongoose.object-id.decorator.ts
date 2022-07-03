@@ -1,7 +1,7 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import mongoose from 'mongoose';
-import { ApiError } from 'src/error/custom-error';
-import { TYPE_ERROR } from 'src/error/custom-error.interface';
+import { ApiError } from '../error/custom-error';
+import { TYPE_ERROR } from '../error/custom-error.interface';
 import { Request } from 'express';
 
 export const IsObjectIdParam = createParamDecorator(

@@ -1,11 +1,10 @@
-import { ObjectId } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { Document } from 'mongoose';
-import { CommentModel } from 'src/comment/model/comment.model';
+import { Document } from 'mongoose';
+
 export type UserModelDocument = UserModel & Document;
 @Schema({ collection: 'users' })
 export class UserModel {
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true })
   fullName: string;
 
   @Prop({ default: null })
@@ -14,7 +13,7 @@ export class UserModel {
   @Prop({ unique: true, required: true })
   email: string;
 
-  @Prop({ default: '' })
+  @Prop({ default: './path/random' })
   avatar: string;
 }
 export const UserModelSchema = SchemaFactory.createForClass(UserModel);

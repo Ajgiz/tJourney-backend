@@ -1,9 +1,7 @@
-import { TYPE_ERROR } from './../../../../error/custom-error.interface';
-import { ApiError } from './../../../../error/custom-error';
 import { IFindOneRefreshToken, IPayloadRefreshToken } from './token.interface';
 import { MongoId } from './../../../../mongoose.interface';
 import { TokenModel, TokenModelDocument } from './../model/token.model';
-import { configAuth } from './../../../auth.config';
+import { CONFIG_AUTH } from './../../../auth.config';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { IPayloadJwt } from 'src/auth/service/auth.interface';
@@ -20,11 +18,11 @@ export class TokenService {
   async createTokens(dto: IPayloadJwt) {
     const accessToken = this.jwtService.sign(dto, {
       expiresIn: '60m',
-      secret: configAuth.ACCESS_JWT_SECRET_KEY,
+      secret: CONFIG_AUTH.ACCESS_JWT_SECRET_KEY,
     });
     const refreshToken = this.jwtService.sign(
       { email: dto.email, id: dto.id },
-      { expiresIn: '7d', secret: configAuth.REFRESH_JWT_SECRET_KEY },
+      { expiresIn: '7d', secret: CONFIG_AUTH.REFRESH_JWT_SECRET_KEY },
     );
     return {
       accessToken,
@@ -42,7 +40,7 @@ export class TokenService {
   validateRefreshToken(token: string): null | IPayloadRefreshToken {
     try {
       const validateResult = this.jwtService.verify(token, {
-        secret: configAuth.REFRESH_JWT_SECRET_KEY,
+        secret: CONFIG_AUTH.REFRESH_JWT_SECRET_KEY,
       });
       return validateResult;
     } catch (e) {
@@ -51,7 +49,7 @@ export class TokenService {
   }
 
   async createRefreshToken(token: string, id: MongoId) {
-    let refreshToken = await this.findOne({ token, id });
+    let refreshToken = await this.findOne({ _id: id });
     if (refreshToken) {
       refreshToken = await this.tokenModel.findByIdAndUpdate(refreshToken._id, {
         refreshToken: token,
@@ -66,11 +64,6 @@ export class TokenService {
   }
 
   async findOne(dto: IFindOneRefreshToken) {
-    const token = await this.tokenModel.findOne({
-      id: dto.id,
-      refreshToken: dto.token,
-    });
-
-    return new TokenEntity(token);
+    return await this.tokenModel.findOne(dto);
   }
 }

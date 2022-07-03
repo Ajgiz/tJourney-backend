@@ -1,9 +1,8 @@
-import { MongoId } from 'src/mongoose.interface';
+import { MongoId } from '../../mongoose.interface';
 import { UserModel } from '../model/user.model';
 
 export class UserEntity {
   fullName: string;
-  password?: string | undefined;
   _id: MongoId;
   email: string;
   avatar: string;
@@ -13,6 +12,5 @@ export class UserEntity {
     this._id = obj._id;
     this.email = obj.email;
     this.fullName = obj.fullName;
-    this.password = obj.password;
   }
 }

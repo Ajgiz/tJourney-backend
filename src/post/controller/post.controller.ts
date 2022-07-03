@@ -14,21 +14,25 @@ import {
   UseFilters,
   HttpCode,
   Query,
+  UseGuards,
 } from '@nestjs/common';
-import { ObjectId } from 'mongoose';
-import { CustomValidationPipe } from 'src/validation-pipe/custom-validation-pipe';
-import { CustomExceptionFilter } from 'src/exception/custom-exception';
-import { IsObjectIdParam } from 'src/custom-decorators/validation-mongoose.object-id';
-import { MongoId } from 'src/mongoose.interface';
+import { CustomValidationPipe } from '../../validation-pipe/custom-validation-pipe';
+import { CustomExceptionFilter } from '../../exception/custom-exception';
+import { IsObjectIdParam } from '../../custom-decorators/validation-mongoose.object-id.decorator';
+import { MongoId } from '../../mongoose.interface';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-guards';
+import { GetUser } from 'src/custom-decorators/get-user.decorator';
+import { IJwtData } from 'src/auth/strategies/jwt-strategy';
 
 @UseFilters(CustomExceptionFilter)
 @Controller('post')
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
+  @UseGuards(JwtAuthGuard)
   @UsePipes(CustomValidationPipe)
   @Post('create')
-  create(@Body() createPostDto: CreatePostDto) {
+  create(@GetUser() user: IJwtData, @Body() createPostDto: CreatePostDto) {
     return this.postService.create(createPostDto);
   }
 
@@ -44,7 +48,7 @@ export class PostController {
     return this.postService.search(dto);
   }
 
-  @Get('/popular')
+  @Get('popular')
   @HttpCode(200)
   findPopularPosts() {
     return this.postService.findPopularPosts();
@@ -61,12 +65,14 @@ export class PostController {
     return this.postService.findOne(id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   @HttpCode(200)
   update(@IsObjectIdParam() id: MongoId, @Body() updatePostDto: UpdatePostDto) {
     return this.postService.update(id, updatePostDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   @HttpCode(200)
   deleteOne(@IsObjectIdParam() id: MongoId) {

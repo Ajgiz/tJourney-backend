@@ -1,14 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import {
-  PipeTransform,
-  Injectable,
-  ArgumentMetadata,
-  BadRequestException,
-} from '@nestjs/common';
+import { PipeTransform, Injectable, ArgumentMetadata } from '@nestjs/common';
 import { validate } from 'class-validator';
 import { plainToClass } from 'class-transformer';
-import { ApiError } from 'src/error/custom-error';
-import { TYPE_ERROR } from 'src/error/custom-error.interface';
+import { ApiError } from '../error/custom-error';
+import { TYPE_ERROR } from '../error/custom-error.interface';
 
 @Injectable()
 export class CustomValidationPipe implements PipeTransform<any> {
@@ -25,7 +20,10 @@ export class CustomValidationPipe implements PipeTransform<any> {
     }
 
     const object = plainToClass(metatype, value);
-    const errors = await validate(object);
+    const errors = await validate(object, {
+      forbidUnknownValues: true,
+      whitelist: true,
+    });
     const messages: { [key: string]: any } = errors.reduce((acc, err) => {
       acc[err.property] =
         Object.values(err.constraints).length === 1

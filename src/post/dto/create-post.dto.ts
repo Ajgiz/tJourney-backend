@@ -4,8 +4,9 @@ export class CreatePostDto {
   @IsString()
   title: string;
 
-  @IsString()
-  body: string;
+  @IsString({ each: true })
+  @IsArray()
+  body: string[];
 
   @IsString({ each: true })
   @IsArray()

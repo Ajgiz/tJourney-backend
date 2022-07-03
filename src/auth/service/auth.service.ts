@@ -1,11 +1,10 @@
 import { TokenService } from './../submodules/token/service/token.service';
 import { TYPE_ERROR } from './../../error/custom-error.interface';
 import { ApiError } from './../../error/custom-error';
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-import { UserService } from 'src/user/service/user.service';
+import { Injectable } from '@nestjs/common';
+import { UserService } from '../../user/service/user.service';
 import * as bcrypt from 'bcrypt';
 import { AuthLoginDto } from '../dto/login-auth.dto';
-import { JwtService } from '@nestjs/jwt';
 import { IPayloadJwt } from './auth.interface';
 import { AuthRegisterDto } from '../dto/register-auth.dto';
 
@@ -99,20 +98,31 @@ export class AuthService {
   }
 
   async register(data: AuthRegisterDto) {
-    const user = await this.userService.findOne({ email: data.email });
-    if (user) {
+    const isEmailExist = await this.userService.findOne({ email: data.email });
+    if (isEmailExist) {
       throw new ApiError(
         400,
         { response: 'Пользователь с такой почтой уже есть' },
         TYPE_ERROR.BAD_REQUEST,
       );
     }
-
+    const isFullNameExist = await this.userService.findOne({
+      fullName: data.fullName,
+    });
+    if (isFullNameExist) {
+      throw new ApiError(
+        400,
+        { response: 'Пользователь с таким именем уже есть' },
+        TYPE_ERROR.BAD_REQUEST,
+      );
+    }
     const salt = data.password ? await bcrypt.genSalt(5) : 0;
     const hash = data.password ? await bcrypt.hash(data.password, salt) : null;
 
     const newUser = await this.userService.create({
-      ...data,
+      //контролируем какие данные надо для создания пользователя
+      email: data.email,
+      fullName: data.fullName,
       password: hash,
     });
 

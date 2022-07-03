@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { MongoId } from 'src/mongoose.interface';
+import { MongoId } from '../../../../mongoose.interface';
 
 export type TokenModelDocument = Document & TokenModel;
 @Schema({ collection: 'tokens' })

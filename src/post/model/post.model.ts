@@ -6,8 +6,8 @@ export class PostModel {
   @Prop()
   title: string;
 
-  @Prop()
-  body: string;
+  @Prop([String])
+  body: string[];
 
   @Prop([String])
   tags: string[];
