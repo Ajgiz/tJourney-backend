@@ -21,8 +21,8 @@ export class CustomValidationPipe implements PipeTransform<any> {
 
     const object = plainToClass(metatype, value);
     const errors = await validate(object, {
-      forbidUnknownValues: true,
       whitelist: true,
+      forbidNonWhitelisted: true,
     });
     const messages: { [key: string]: any } = errors.reduce((acc, err) => {
       acc[err.property] =

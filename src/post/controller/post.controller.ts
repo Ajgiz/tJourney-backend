@@ -29,7 +29,7 @@ import { IJwtData } from 'src/auth/strategies/jwt-strategy';
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @UsePipes(CustomValidationPipe)
   @Post('create')
   create(@GetUser() user: IJwtData, @Body() createPostDto: CreatePostDto) {

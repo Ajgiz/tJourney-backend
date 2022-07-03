@@ -20,6 +20,7 @@ export class PostService {
 
   async create(dto: CreatePostDto) {
     const post = await this.postModel.create(dto);
+    console.log(dto);
     if (!post)
       throw new ApiError(
         500,
