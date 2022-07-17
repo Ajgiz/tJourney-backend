@@ -1,76 +1,155 @@
 import { createClassesObject } from '../../common/helper-function';
-import { CommentEntity } from './../entity/comment.entity';
+import { CommentEntity, FullCommentEntity } from './../entity/comment.entity';
 import { CommentModel } from './../model/comment.model';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { CreateCommentDto } from '../dto/create-comment.dto';
 import { UpdateCommentDto } from '../dto/update-comment.dto';
-import { Model, ObjectId } from 'mongoose';
+import { Model } from 'mongoose';
+import { ObjectId } from 'mongodb';
 import { CommentModelDocument } from '../model/comment.model';
 import { ApiError } from '../../error/custom-error';
 import { TYPE_ERROR } from '../../error/custom-error.interface';
-import { MongoId } from '../../mongoose.interface';
+import { ICommentModels, IFindOneComment } from './comment-service.interface';
+import { GetCommentsDto } from '../dto/get-comments.dto';
+import { UserService } from 'src/user/service/user.service';
+
 @Injectable()
 export class CommentService {
   constructor(
     @InjectModel(CommentModel.name)
     private commentModel: Model<CommentModelDocument>,
+    private userService: UserService,
   ) {}
 
-  async create(dto: CreateCommentDto) {
-    const comment = await this.commentModel.create(dto);
+  async create(dto: CreateCommentDto, user: ObjectId) {
+    const comment = await this.commentModel.create({ ...dto, user });
     if (!comment)
       throw new ApiError(
         500,
-        { repsonse: 'comment not created' },
+        ['comment not created'],
         TYPE_ERROR.INTERNAL_SERVER,
       );
-    return new CommentEntity(comment);
+    const comments = await this.getFullComments([comment]);
+    return comments[0];
   }
 
-  async findAll() {
-    const allComments = await this.commentModel.find();
-    if (!allComments)
-      throw new ApiError(
-        404,
-        { repsonse: 'comments not created' },
-        TYPE_ERROR.NOT_FOUND,
+  async setLike(userId: ObjectId, id: ObjectId) {
+    let comment = await this.commentModel.findById(id);
+    if (!comment.likes.includes(userId)) {
+      comment = await this.commentModel.findByIdAndUpdate(
+        id,
+        {
+          $push: { likes: userId },
+          $pull: { dislikes: userId },
+        },
+        { new: true },
       );
-    return createClassesObject(CommentEntity, allComments) as CommentEntity[];
+    } else {
+      comment = await this.commentModel.findByIdAndUpdate(
+        id,
+        {
+          $pull: { likes: userId },
+        },
+        {
+          new: true,
+        },
+      );
+    }
+    return {
+      like: comment.likes.length,
+      dislike: comment.dislikes.length,
+    };
   }
 
-  async findOne(id: MongoId) {
+  async setDislike(userId: ObjectId, id: ObjectId) {
+    let comment = await this.commentModel.findById(id);
+    if (comment.dislikes.includes(userId)) {
+      comment = await this.commentModel.findByIdAndUpdate(
+        id,
+        {
+          $pull: { dislikes: userId },
+        },
+        { new: true },
+      );
+    } else {
+      comment = await this.commentModel.findByIdAndUpdate(
+        id,
+        {
+          $pull: { likes: userId },
+          $push: { dislikes: userId },
+        },
+        { new: true },
+      );
+    }
+    return {
+      like: comment.likes.length,
+      dislike: comment.dislikes.length,
+    };
+  }
+
+  async getFullComments(comments: ICommentModels[]) {
+    for (const comment of comments) {
+      const user = await this.userService.findById(comment.user);
+      comment.userInfo = {
+        avatar: user.avatar,
+        name: user.fullName,
+      };
+      comment.countSubComments = await this.getCountSubComments(comment._id);
+    }
+    return createClassesObject(
+      FullCommentEntity,
+      comments,
+    ) as FullCommentEntity[];
+  }
+
+  async getCountSubComments(parent: ObjectId) {
+    return await this.commentModel.find({ parent }).count();
+  }
+
+  async findAll(dto: GetCommentsDto) {
+    const comments = await this.commentModel
+      .find({
+        parent: dto.parent || null,
+        post: dto.post,
+      })
+      .sort({ _id: -1 })
+      .skip(dto.skip)
+      .limit(dto.limit);
+
+    if (!comments)
+      throw new ApiError(404, ['comments not created'], TYPE_ERROR.NOT_FOUND);
+
+    return await this.getFullComments(comments);
+  }
+
+  async findMany(dto: IFindOneComment) {
+    const comments = await this.commentModel.find(dto);
+    if (!comments)
+      throw new ApiError(404, ['comments not found'], TYPE_ERROR.NOT_FOUND);
+    return createClassesObject(CommentEntity, comments) as CommentEntity[];
+  }
+
+  async findById(id: ObjectId) {
     const comment = await this.commentModel.findById(id);
     if (!comment)
-      throw new ApiError(
-        404,
-        { repsonse: 'comments not found' },
-        TYPE_ERROR.NOT_FOUND,
-      );
+      throw new ApiError(404, ['comments not found'], TYPE_ERROR.NOT_FOUND);
     return new CommentEntity(comment);
   }
 
-  async update(id: MongoId, dto: UpdateCommentDto) {
+  async update(id: ObjectId, dto: UpdateCommentDto) {
     const comment = await this.commentModel.findByIdAndUpdate(id, dto, {
       new: true,
     });
     if (!comment)
-      throw new ApiError(
-        404,
-        { repsonse: 'comments not found' },
-        TYPE_ERROR.NOT_FOUND,
-      );
+      throw new ApiError(404, ['comments not found'], TYPE_ERROR.NOT_FOUND);
     return new CommentEntity(comment);
   }
 
-  async deleteOne(id: MongoId) {
+  async deleteOne(id: ObjectId) {
     const deletedComment = await this.commentModel.findByIdAndRemove(id);
     if (!deletedComment)
-      throw new ApiError(
-        404,
-        { repsonse: 'comments not found' },
-        TYPE_ERROR.NOT_FOUND,
-      );
+      throw new ApiError(404, ['comments not found'], TYPE_ERROR.NOT_FOUND);
     return new CommentEntity(deletedComment);
   }
 }

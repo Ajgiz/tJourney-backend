@@ -7,11 +7,13 @@ import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { PostModule } from './post/post.module';
 import { AuthModule } from './auth/auth.module';
+import { CommunityModule } from './community/community.module';
 @Module({
   imports: [
     UserModule,
     PostModule,
     CommentModule,
+    CommunityModule,
     AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,

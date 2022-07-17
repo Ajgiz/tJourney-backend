@@ -1,3 +1,4 @@
+import { IJwtData } from './../strategies/jwt-strategy';
 import { CustomValidationPipe } from '../../validation-pipe/custom-validation-pipe';
 import {
   Controller,
@@ -18,6 +19,7 @@ import { AuthRegisterDto } from '../dto/register-auth.dto';
 import { JwtAuthGuard } from '../guards/jwt-guards';
 import { ApiError } from 'src/error/custom-error';
 import { TYPE_ERROR } from 'src/error/custom-error.interface';
+import { GetUser } from 'src/custom-decorators/get-user.decorator';
 
 @UseFilters(CustomExceptionFilter)
 @Controller('auth')
@@ -41,19 +43,14 @@ export class AuthController {
     if (req.cookies?.refreshToken) {
       const { refreshToken } = req.cookies;
       return await this.authService.refreshToken(refreshToken);
-    } else
-      throw new ApiError(
-        401,
-        { response: 'not authorized' },
-        TYPE_ERROR.UNAUTHORIZED,
-      );
+    } else throw new ApiError(401, ['not authorized'], TYPE_ERROR.UNAUTHORIZED);
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('logout')
-  async logout(@Res({ passthrough: true }) res: Response, @Req() req: Request) {
-    const { refreshToken } = req.cookies;
-    const token = await this.authService.logout(refreshToken);
+  async logout(@GetUser() user: IJwtData) {
+    // cookies не работает, почему то cookie с клиента и с сервера разные
+    const token = await this.authService.logout(user._id);
     return token;
   }
 }

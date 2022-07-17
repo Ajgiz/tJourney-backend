@@ -18,6 +18,8 @@ import { IsObjectIdParam } from '../../custom-decorators/validation-mongoose.obj
 import { MongoId } from '../../mongoose.interface';
 import { JwtAuthGuard } from '../../auth/guards/jwt-guards';
 import { Request } from 'express';
+import { GetUser } from 'src/custom-decorators/get-user.decorator';
+import { IJwtData } from 'src/auth/strategies/jwt-strategy';
 
 @UseFilters(CustomExceptionFilter)
 @Controller('user')
@@ -31,8 +33,8 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Get('me/profile')
-  getProfile(@Req() req: Request) {
-    return this.userService.findById(req.user._id);
+  getProfile(@GetUser() user: IJwtData) {
+    return this.userService.findById(user._id);
   }
 
   @UseGuards(JwtAuthGuard)

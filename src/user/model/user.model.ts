@@ -1,8 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
+import { NAME_MODEL_ENUM } from 'src/mongoose.interface';
+import { ObjectId } from 'mongodb';
 
 export type UserModelDocument = UserModel & Document;
-@Schema({ collection: 'users' })
+@Schema({ collection: NAME_MODEL_ENUM.USER })
 export class UserModel {
   @Prop({ required: true, unique: true })
   fullName: string;
@@ -13,7 +15,28 @@ export class UserModel {
   @Prop({ unique: true, required: true })
   email: string;
 
-  @Prop({ default: './path/random' })
+  @Prop({ default: '' })
+  cover: string;
+
+  @Prop({ default: '' })
   avatar: string;
+
+  @Prop({ default: '' })
+  description: string;
+
+  @Prop({
+    type: [{ type: mongoose.Types.ObjectId, ref: NAME_MODEL_ENUM.USER }],
+  })
+  subscribers: ObjectId[];
+
+  @Prop({
+    type: [{ type: mongoose.Types.ObjectId, ref: NAME_MODEL_ENUM.USER }],
+  })
+  subscriptionBlogs: ObjectId[];
+
+  @Prop({
+    type: [{ type: mongoose.Types.ObjectId, ref: NAME_MODEL_ENUM.COMMUNITY }],
+  })
+  subscriptionCommunities: ObjectId[];
 }
 export const UserModelSchema = SchemaFactory.createForClass(UserModel);

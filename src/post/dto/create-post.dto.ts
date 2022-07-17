@@ -1,14 +1,21 @@
-import { IsArray, IsString } from 'class-validator';
+import { ObjectId } from 'mongodb';
+import { IsArray, IsMongoId, IsOptional, IsString } from 'class-validator';
+import { MongoId } from 'src/mongoose.interface';
+
+export class DataOutput {
+  id: string;
+  data: any[];
+  type: string;
+}
 
 export class CreatePostDto {
   @IsString()
   title: string;
 
-  @IsString({ each: true })
   @IsArray()
-  body: string[];
+  body: DataOutput[];
 
-  @IsString({ each: true })
-  @IsArray()
-  tags: string[];
+  @IsOptional()
+  @IsMongoId()
+  topic?: ObjectId;
 }

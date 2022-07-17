@@ -4,6 +4,7 @@ import { validate } from 'class-validator';
 import { plainToClass } from 'class-transformer';
 import { ApiError } from '../error/custom-error';
 import { TYPE_ERROR } from '../error/custom-error.interface';
+import { collectMessagesError } from 'src/common/helper-function';
 
 @Injectable()
 export class CustomValidationPipe implements PipeTransform<any> {
@@ -12,11 +13,7 @@ export class CustomValidationPipe implements PipeTransform<any> {
       return value;
     }
     if (Array.isArray(value) || typeof value !== 'object') {
-      throw new ApiError(
-        400,
-        { response: 'Validation failed' },
-        TYPE_ERROR.BAD_REQUEST,
-      );
+      throw new ApiError(400, ['Validation failed'], TYPE_ERROR.BAD_REQUEST);
     }
 
     const object = plainToClass(metatype, value);
@@ -24,15 +21,13 @@ export class CustomValidationPipe implements PipeTransform<any> {
       whitelist: true,
       forbidNonWhitelisted: true,
     });
-    const messages: { [key: string]: any } = errors.reduce((acc, err) => {
-      acc[err.property] =
-        Object.values(err.constraints).length === 1
-          ? Object.values(err.constraints)[0]
-          : Object.values(err.constraints);
-      return acc;
-    }, {});
+
     if (errors.length > 0) {
-      throw new ApiError(400, messages, TYPE_ERROR.BAD_REQUEST);
+      throw new ApiError(
+        400,
+        collectMessagesError(errors),
+        TYPE_ERROR.BAD_REQUEST,
+      );
     }
     return value;
   }

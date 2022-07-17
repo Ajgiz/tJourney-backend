@@ -4,7 +4,3 @@ export enum TYPE_ERROR {
   INTERNAL_SERVER = 'internal_server',
   UNAUTHORIZED = 'not_authorized',
 }
-
-export interface IErrorMessage {
-  [key: string]: string[] | string;
-}

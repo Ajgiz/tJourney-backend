@@ -1,3 +1,4 @@
+import { UserModule } from './../user/user.module';
 import {
   CommentModel,
   CommentModelSchema,
@@ -14,6 +15,8 @@ import { CommentController } from './controller/comment.controller';
     MongooseModule.forFeature([
       { name: CommentModel.name, schema: CommentModelSchema },
     ]),
+    UserModule,
   ],
+  exports: [CommentService],
 })
 export class CommentModule {}

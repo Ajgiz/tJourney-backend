@@ -1,7 +1,7 @@
-import { MongoId } from './../../mongoose.interface';
+import { ObjectId } from 'mongodb';
 
 export interface IPayloadJwt {
   email: string;
   fullName: string;
-  id: MongoId;
+  id: ObjectId;
 }

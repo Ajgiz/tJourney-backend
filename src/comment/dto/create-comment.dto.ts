@@ -1,13 +1,14 @@
-import { IsString, IsMongoId } from 'class-validator';
-import { MongoId } from '../../mongoose.interface';
+import { ObjectId } from 'mongodb';
+import { IsString, IsMongoId, IsOptional } from 'class-validator';
 
 export class CreateCommentDto {
   @IsString()
   text: string;
 
   @IsMongoId()
-  user: MongoId;
+  post: ObjectId;
 
   @IsMongoId()
-  post: MongoId;
+  @IsOptional()
+  parent: ObjectId;
 }

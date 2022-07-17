@@ -1,9 +1,10 @@
-import { MongoId } from './../../../../mongoose.interface';
+import { ObjectId } from 'mongodb';
+
 export interface IFindOneRefreshToken {
-  _id?: MongoId;
+  _id?: ObjectId;
   token?: string;
 }
 export interface IPayloadRefreshToken {
-  id: MongoId;
+  id: ObjectId;
   email: string;
 }

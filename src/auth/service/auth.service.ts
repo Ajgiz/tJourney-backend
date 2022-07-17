@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongodb';
 import { TokenService } from './../submodules/token/service/token.service';
 import { TYPE_ERROR } from './../../error/custom-error.interface';
 import { ApiError } from './../../error/custom-error';
@@ -34,29 +35,21 @@ export class AuthService {
     };
   }
 
-  async logout(token: string) {
-    return await this.tokenService.deleteToken(token);
+  async logout(id: ObjectId) {
+    return await this.tokenService.deleteToken(id);
   }
 
   async login(data: AuthLoginDto) {
     const user = await this.userService.findOne({ email: data.email });
     if (!user) {
-      throw new ApiError(
-        401,
-        { response: 'user not found' },
-        TYPE_ERROR.UNAUTHORIZED,
-      );
+      throw new ApiError(401, ['user not found'], TYPE_ERROR.UNAUTHORIZED);
     }
     const isPasswordEqual = await this.validatePassword(
       user.password,
       data.password,
     );
     if (!isPasswordEqual)
-      throw new ApiError(
-        401,
-        { response: 'user not found' },
-        TYPE_ERROR.UNAUTHORIZED,
-      );
+      throw new ApiError(401, ['user not found'], TYPE_ERROR.UNAUTHORIZED);
 
     const payload: IPayloadJwt = {
       email: user.email,
@@ -69,26 +62,14 @@ export class AuthService {
 
   async refreshToken(token: string) {
     if (!token)
-      throw new ApiError(
-        401,
-        { response: 'not authorized' },
-        TYPE_ERROR.UNAUTHORIZED,
-      );
+      throw new ApiError(401, ['not authorized'], TYPE_ERROR.UNAUTHORIZED);
 
     const isValidToken = this.tokenService.validateRefreshToken(token);
     if (!isValidToken)
-      throw new ApiError(
-        401,
-        { response: 'not authorized' },
-        TYPE_ERROR.UNAUTHORIZED,
-      );
+      throw new ApiError(401, ['not authorized'], TYPE_ERROR.UNAUTHORIZED);
     const user = await this.userService.findById(isValidToken.id);
     if (!user)
-      throw new ApiError(
-        401,
-        { response: 'usernot exist' },
-        TYPE_ERROR.UNAUTHORIZED,
-      );
+      throw new ApiError(401, ['usernot exist'], TYPE_ERROR.UNAUTHORIZED);
 
     return await this.extraditionResponse({
       email: user.email,
@@ -102,7 +83,7 @@ export class AuthService {
     if (isEmailExist) {
       throw new ApiError(
         400,
-        { response: 'Пользователь с такой почтой уже есть' },
+        ['Пользователь с такой почтой уже есть'],
         TYPE_ERROR.BAD_REQUEST,
       );
     }
@@ -112,7 +93,7 @@ export class AuthService {
     if (isFullNameExist) {
       throw new ApiError(
         400,
-        { response: 'Пользователь с таким именем уже есть' },
+        ['Пользователь с таким именем уже есть'],
         TYPE_ERROR.BAD_REQUEST,
       );
     }

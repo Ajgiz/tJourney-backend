@@ -7,10 +7,11 @@ import { Request } from 'express';
 export const IsObjectIdParam = createParamDecorator(
   (_: unknown, ctx: ExecutionContext) => {
     const request: Request = ctx.switchToHttp().getRequest();
+    console.log(request.params.id);
     if (!mongoose.isValidObjectId(request.params.id))
       throw new ApiError(
         400,
-        { id: 'id must be type ObjectId' },
+        ['id must be type ObjectId'],
         TYPE_ERROR.BAD_REQUEST,
       );
     return request.params.id;

@@ -1,11 +1,11 @@
+import { ObjectId } from 'mongodb';
 import { TokenModel } from './../model/token.model';
-import { MongoId } from './../../../../mongoose.interface';
 
 export class TokenEntity {
-  user: MongoId;
+  user: ObjectId;
   refreshToken: string;
-  _id: MongoId;
-  constructor(obj: TokenModel & { _id: MongoId }) {
+  _id: ObjectId;
+  constructor(obj: TokenModel & { _id: ObjectId }) {
     this.refreshToken = obj.refreshToken;
     this._id = obj._id;
     this.user = obj.user;

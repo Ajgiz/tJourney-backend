@@ -1,5 +1,4 @@
 import { IFindOneRefreshToken, IPayloadRefreshToken } from './token.interface';
-import { MongoId } from './../../../../mongoose.interface';
 import { TokenModel, TokenModelDocument } from './../model/token.model';
 import { CONFIG_AUTH } from './../../../auth.config';
 import { Injectable } from '@nestjs/common';
@@ -8,6 +7,7 @@ import { IPayloadJwt } from 'src/auth/service/auth.interface';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { TokenEntity } from '../entity/token.entity';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class TokenService {
@@ -30,9 +30,9 @@ export class TokenService {
     };
   }
 
-  async deleteToken(token: string) {
+  async deleteToken(id: ObjectId) {
     const deletedToken = await this.tokenModel.findOneAndRemove({
-      refreshToken: token,
+      user: id,
     });
     return new TokenEntity(deletedToken);
   }
@@ -48,8 +48,8 @@ export class TokenService {
     }
   }
 
-  async createRefreshToken(token: string, id: MongoId) {
-    let refreshToken = await this.findOne({ _id: id });
+  async createRefreshToken(token: string, id: ObjectId) {
+    let refreshToken = await this.tokenModel.findOne({ user: id });
     if (refreshToken) {
       refreshToken = await this.tokenModel.findByIdAndUpdate(refreshToken._id, {
         refreshToken: token,
@@ -61,9 +61,5 @@ export class TokenService {
       });
     }
     return new TokenEntity(refreshToken);
-  }
-
-  async findOne(dto: IFindOneRefreshToken) {
-    return await this.tokenModel.findOne(dto);
   }
 }
