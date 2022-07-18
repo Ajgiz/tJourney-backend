@@ -57,8 +57,9 @@ export class CommentService {
       );
     }
     return {
-      like: comment.likes.length,
-      dislike: comment.dislikes.length,
+      _id: comment._id,
+      likes: comment.likes,
+      dislikes: comment.dislikes,
     };
   }
 
@@ -83,8 +84,9 @@ export class CommentService {
       );
     }
     return {
-      like: comment.likes.length,
-      dislike: comment.dislikes.length,
+      _id: comment._id,
+      likes: comment.likes,
+      dislikes: comment.dislikes,
     };
   }
 
@@ -107,20 +109,34 @@ export class CommentService {
     return await this.commentModel.find({ parent }).count();
   }
 
-  async findAll(dto: GetCommentsDto) {
+  async findAll({ exclude, limit, parent, post, skip, sort }: GetCommentsDto) {
     const comments = await this.commentModel
       .find({
-        parent: dto.parent || null,
-        post: dto.post,
+        parent: parent || null,
+        post,
       })
-      .sort({ _id: -1 })
-      .skip(dto.skip)
-      .limit(dto.limit);
+      .where('_id')
+      .nin(exclude ? exclude.split(';') : [])
+      .skip(skip)
+      .limit(limit);
 
     if (!comments)
       throw new ApiError(404, ['comments not created'], TYPE_ERROR.NOT_FOUND);
-
-    return await this.getFullComments(comments);
+    return await this.getFullComments(
+      comments.sort((a, b) => {
+        if (sort === 'Популярные') {
+          return (
+            b.likes.length -
+            b.dislikes.length -
+            (a.likes.length - a.dislikes.length)
+          );
+        } else {
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+        }
+      }),
+    );
   }
 
   async findMany(dto: IFindOneComment) {

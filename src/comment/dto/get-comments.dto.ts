@@ -7,6 +7,12 @@ import {
   IsString,
 } from 'class-validator';
 
+enum SORT_COMMENTS_ENUM {
+  LAST = 'Последние',
+  POPULAR = 'Популярные',
+}
+type SortCommetsType = 'Последние' | 'Популярные';
+
 export class GetCommentsDto {
   @IsMongoId()
   post: ObjectId;
@@ -20,4 +26,10 @@ export class GetCommentsDto {
 
   @IsNumber()
   skip: number;
+
+  @IsString()
+  exclude: string;
+
+  @IsEnum(SORT_COMMENTS_ENUM)
+  sort: SortCommetsType;
 }

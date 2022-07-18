@@ -36,6 +36,7 @@ export class CommentController {
     return this.commentService.create(dto, user._id);
   }
 
+  @UseGuards(CustomValidationPipe)
   @Get('find')
   @HttpCode(200)
   findAll(@Query() searchDto: GetCommentsDto) {
