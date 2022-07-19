@@ -48,7 +48,7 @@ export class PostService {
     });
   }
 
-  async getFullPosts(posts: IPostModels[]) {
+  async collectFullPosts(posts: IPostModels[]) {
     for (const post of posts) {
       const author = await this.userService.findById(post.author);
       if (post.topic) {
@@ -70,7 +70,7 @@ export class PostService {
     return createClassesObject(FullPostEntity, posts) as FullPostEntity[];
   }
 
-  async findAllNew() {
+  async getNewPosts() {
     const allPosts = await this.postModel
       .find()
       .sort({ $natural: -1 })
@@ -78,7 +78,7 @@ export class PostService {
     if (!allPosts)
       throw new ApiError(404, ['posts not found'], TYPE_ERROR.NOT_FOUND);
 
-    return await this.getFullPosts(allPosts);
+    return await this.collectFullPosts(allPosts);
   }
 
   async clean() {
@@ -97,23 +97,25 @@ export class PostService {
     if (dto.title) queryParams.title = { $regex: dto.title, $options: 'i' };
     if (dto.body) queryParams.body = { $regex: dto.body, $options: 'i' };
     if (dto.tags) queryParams.tags = { $regex: dto.tags, $options: 'i' };
+    console.log(dto);
+    console.log(queryParams);
     const posts = await this.postModel
       .find(queryParams)
-      .limit(dto.limit || 10)
-      .skip(dto.take || 0)
+      .limit(dto.limit)
+      .skip(dto.skip)
       .sort(sortParams);
 
     if (!posts)
       throw new ApiError(404, ['posts not found'], TYPE_ERROR.NOT_FOUND);
 
-    return await this.getFullPosts(posts);
+    return await this.collectFullPosts(posts);
   }
 
-  async findPopularPosts() {
+  async getPopularPosts() {
     const posts = await this.postModel.find().sort({ views: -1 });
     if (!posts)
       throw new ApiError(404, ['posts not found'], TYPE_ERROR.NOT_FOUND);
-    return await this.getFullPosts(posts);
+    return await this.collectFullPosts(posts);
   }
 
   async findOne(id: ObjectId, token: string) {
@@ -122,7 +124,7 @@ export class PostService {
     if (!post)
       throw new ApiError(404, ['post not found'], TYPE_ERROR.NOT_FOUND);
     if (user) await this.incrementViews(user.id, post.views, post._id);
-    const posts = await this.getFullPosts([post]);
+    const posts = await this.collectFullPosts([post]);
     return posts[0];
   }
 

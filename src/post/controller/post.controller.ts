@@ -41,7 +41,7 @@ export class PostController {
   @Get()
   @HttpCode(200)
   findAllNew() {
-    return this.postService.findAllNew();
+    return this.postService.getNewPosts();
   }
 
   @Get('search')
@@ -53,7 +53,7 @@ export class PostController {
   @Get('popular')
   @HttpCode(200)
   findPopularPosts() {
-    return this.postService.findPopularPosts();
+    return this.postService.getPopularPosts();
   }
 
   @Delete('clean')

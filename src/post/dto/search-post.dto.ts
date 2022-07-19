@@ -27,13 +27,11 @@ export class SearchPostDto {
   @IsString()
   tags?: string;
 
-  @IsOptional()
   @IsNumber()
-  limit?: number;
+  limit: number;
 
-  @IsOptional()
   @IsNumber()
-  take?: number;
+  skip: number;
 
   @IsBoolean()
   @IsEnum(SORT_ENUM)
