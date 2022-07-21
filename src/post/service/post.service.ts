@@ -9,7 +9,10 @@ import { CreatePostDto } from '../dto/create-post.dto';
 import { UpdatePostDto } from '../dto/update-post.dto';
 import { FullPostEntity, PostEntity } from '../entity/post.entity';
 import { TYPE_ERROR } from '../../error/custom-error.interface';
-import { createClassesObject } from '../../common/helper-function';
+import {
+  createClassesObject,
+  getInfoLikesAndDislikes,
+} from '../../common/helper-function';
 import { SearchPostDto } from '../dto/search-post.dto';
 import { UserService } from 'src/user/service/user.service';
 import { CommunityService } from 'src/community/service/community.service';
@@ -150,10 +153,7 @@ export class PostService {
         },
       );
     }
-    return {
-      like: post.likes.length,
-      dislike: post.dislikes.length,
-    };
+    return getInfoLikesAndDislikes(post);
   }
 
   async setDislike(userId: ObjectId, postId: ObjectId) {
@@ -176,10 +176,7 @@ export class PostService {
         { new: true },
       );
     }
-    return {
-      like: post.likes.length,
-      dislike: post.dislikes.length,
-    };
+    return getInfoLikesAndDislikes(post);
   }
 
   async validateToken(token: string) {

@@ -1,5 +1,7 @@
+import { IPersonInfo } from 'src/post/service/post-service.interface';
 import { UserModel } from '../model/user.model';
 import { ObjectId } from 'mongodb';
+import { ISubscribesInfo } from '../service/user-service.interface';
 
 export class UserEntity {
   fullName: string;
@@ -11,6 +13,7 @@ export class UserEntity {
   subscribers: ObjectId[];
   description: string;
   cover: string;
+
   constructor(obj: UserModel & { _id: ObjectId }) {
     this.avatar = obj.avatar;
     this._id = obj._id;
@@ -21,5 +24,15 @@ export class UserEntity {
     this.subscribers = obj.subscribers;
     this.subscriptionBlogs = obj.subscriptionBlogs;
     this.subscriptionCommunities = obj.subscriptionCommunities;
+  }
+}
+
+export class FullUserEntity extends UserEntity {
+  subscribersInfo: ISubscribesInfo[];
+  constructor(
+    obj: UserModel & { _id: ObjectId; subscribersInfo: ISubscribesInfo[] },
+  ) {
+    super(obj);
+    this.subscribersInfo = obj.subscribersInfo;
   }
 }

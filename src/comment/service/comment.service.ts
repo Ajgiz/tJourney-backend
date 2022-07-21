@@ -1,4 +1,7 @@
-import { createClassesObject } from '../../common/helper-function';
+import {
+  createClassesObject,
+  getInfoLikesAndDislikes,
+} from '../../common/helper-function';
 import { CommentEntity, FullCommentEntity } from './../entity/comment.entity';
 import { CommentModel } from './../model/comment.model';
 import { Injectable } from '@nestjs/common';
@@ -56,11 +59,7 @@ export class CommentService {
         },
       );
     }
-    return {
-      _id: comment._id,
-      likes: comment.likes,
-      dislikes: comment.dislikes,
-    };
+    return getInfoLikesAndDislikes(comment);
   }
 
   async setDislike(userId: ObjectId, id: ObjectId) {
@@ -83,11 +82,7 @@ export class CommentService {
         { new: true },
       );
     }
-    return {
-      _id: comment._id,
-      likes: comment.likes,
-      dislikes: comment.dislikes,
-    };
+    return getInfoLikesAndDislikes(comment);
   }
 
   async getFullComments(comments: ICommentModels[]) {
@@ -124,7 +119,7 @@ export class CommentService {
       throw new ApiError(404, ['comments not created'], TYPE_ERROR.NOT_FOUND);
     return await this.getFullComments(
       comments.sort((a, b) => {
-        if (sort === 'Популярные') {
+        if (sort === 'popular') {
           return (
             b.likes.length -
             b.dislikes.length -

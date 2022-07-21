@@ -34,7 +34,13 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @Get('me/profile')
   getProfile(@GetUser() user: IJwtData) {
-    return this.userService.findById(user._id);
+    return this.userService.getMe(user._id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me/subscribe')
+  async getSubscribeBlogs(@GetUser() user: IJwtData) {
+    return await this.userService.getSubscribeBlogs(user._id);
   }
 
   @UseGuards(JwtAuthGuard)

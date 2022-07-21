@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongodb';
 import { CommunityEntity } from './../community/entity/community.entity';
 import { CommentModel } from 'src/comment/model/comment.model';
 import { UserModel } from './../user/model/user.model';
@@ -7,6 +8,7 @@ import { PostEntity } from 'src/post/entity/post.entity';
 import { UserEntity } from 'src/user/entity/user.entity';
 import { CommunityModel } from 'src/community/model/community.model';
 import { ValidationError } from 'class-validator';
+import { IPayloadLikesAndDislikes } from 'src/likes.interface';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type ConstructorTypeOf<T> = new (...args: any[]) => T;
@@ -49,4 +51,16 @@ export const collectMessagesError = (messages: ValidationError[]) => {
   };
   helper(messages);
   return messagesError;
+};
+
+export const getInfoLikesAndDislikes = ({
+  _id,
+  dislikes,
+  likes,
+}: IPayloadLikesAndDislikes) => {
+  return {
+    _id,
+    likes,
+    dislikes,
+  };
 };

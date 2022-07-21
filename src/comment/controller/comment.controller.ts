@@ -40,6 +40,7 @@ export class CommentController {
   @Get('find')
   @HttpCode(200)
   findAll(@Query() searchDto: GetCommentsDto) {
+    console.log('HERE', searchDto);
     return this.commentService.findAll(searchDto);
   }
 

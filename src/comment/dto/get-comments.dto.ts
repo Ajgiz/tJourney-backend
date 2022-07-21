@@ -8,10 +8,10 @@ import {
 } from 'class-validator';
 
 enum SORT_COMMENTS_ENUM {
-  LAST = 'Последние',
-  POPULAR = 'Популярные',
+  LAST = 'new',
+  POPULAR = 'popular',
 }
-type SortCommetsType = 'Последние' | 'Популярные';
+type SortCommetsType = 'new' | 'popular';
 
 export class GetCommentsDto {
   @IsMongoId()

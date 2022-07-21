@@ -70,7 +70,6 @@ export class AuthService {
     const user = await this.userService.findById(isValidToken.id);
     if (!user)
       throw new ApiError(401, ['usernot exist'], TYPE_ERROR.UNAUTHORIZED);
-
     return await this.extraditionResponse({
       email: user.email,
       fullName: user.fullName,

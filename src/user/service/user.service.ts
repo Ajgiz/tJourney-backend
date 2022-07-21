@@ -7,8 +7,9 @@ import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { IUserModel } from '../model/user.interface';
 import { UserModel } from '../model/user.model';
-import { UserEntity } from '../entity/user.entity';
+import { FullUserEntity, UserEntity } from '../entity/user.entity';
 import { ObjectId } from 'mongodb';
+import { IFindOneUser } from './user-service.interface';
 @Injectable()
 export class UserService {
   constructor(
@@ -30,16 +31,46 @@ export class UserService {
     return createClassesObject(UserEntity, allUsers) as UserEntity[];
   }
 
-  async findById(id: ObjectId) {
+  async getMe(id: ObjectId) {
     const user = await this.userModel.findById(id);
     if (!user) {
       throw new ApiError(404, ['user not found'], TYPE_ERROR.NOT_FOUND);
     }
+    const subscribersInfo = await this.findMySubscribe(user.subscribers);
+
+    return {
+      ...new UserEntity(user),
+      subscribersInfo,
+    };
+  }
+
+  async findMySubscribe(subscribers: ObjectId[]) {
+    const users = await this.userModel
+      .find({ _id: { $in: subscribers } })
+      .select({ fullName: 1, avatar: 1, _id: 1 });
+    return users.map((user) => ({
+      name: user.fullName,
+      avatar: user.avatar,
+      _id: user._id,
+    }));
+  }
+
+  async findById(id: ObjectId) {
+    const user = await this.userModel.findById(id);
+    if (!user)
+      throw new ApiError(404, ['user not found'], TYPE_ERROR.NOT_FOUND);
     return new UserEntity(user);
   }
 
-  async findOne(dto: UpdateUserDto) {
+  async findOne(dto: IFindOneUser) {
     return await this.userModel.findOne(dto);
+  }
+
+  async getSubscribeBlogs(id: ObjectId) {
+    const subscribeBlogs = await this.userModel.find({
+      subscribers: { $in: [id] },
+    });
+    return createClassesObject(UserEntity, subscribeBlogs) as UserEntity[];
   }
 
   async subscribeCommunity(id: ObjectId, userId: ObjectId) {
