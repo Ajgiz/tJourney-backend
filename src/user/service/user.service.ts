@@ -1,3 +1,4 @@
+import { UserModelDocument } from './../model/user.model';
 import { createClassesObject } from '../../common/helper-function';
 import { TYPE_ERROR } from '../../error/custom-error.interface';
 import { ApiError } from '../../error/custom-error';
@@ -5,16 +6,17 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
-import { IUserModel } from '../model/user.interface';
 import { UserModel } from '../model/user.model';
 import { FullUserEntity, UserEntity } from '../entity/user.entity';
 import { ObjectId } from 'mongodb';
 import { IFindOneUser } from './user-service.interface';
+import { PeriodRatingType } from '../dto/get-rating-users';
+import { Model } from 'mongoose';
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(UserModel.name)
-    private readonly userModel: IUserModel,
+    private readonly userModel: Model<UserModelDocument>,
   ) {}
 
   async create(dto: CreateUserDto) {
@@ -59,38 +61,82 @@ export class UserService {
     const user = await this.userModel.findById(id);
     if (!user)
       throw new ApiError(404, ['user not found'], TYPE_ERROR.NOT_FOUND);
-    return new UserEntity(user);
+    const subscribersInfo = await this.findMySubscribe(user.subscribers);
+    return {
+      ...new UserEntity(user),
+      subscribersInfo,
+    };
+  }
+  async getUsersRating(period: PeriodRatingType) {
+    const users = await this.userModel.find();
   }
 
   async findOne(dto: IFindOneUser) {
     return await this.userModel.findOne(dto);
   }
 
-  async getSubscribeBlogs(id: ObjectId) {
+  async incrementRating() {}
+
+  async getSubscriptionsOnBlogs(id: ObjectId) {
     const subscribeBlogs = await this.userModel.find({
       subscribers: { $in: [id] },
     });
     return createClassesObject(UserEntity, subscribeBlogs) as UserEntity[];
   }
 
-  async subscribeCommunity(id: ObjectId, userId: ObjectId) {
+  async subscriptionOnCommunity(id: ObjectId, userId: ObjectId) {
     const user = await this.userModel.findById(userId);
     if (user.subscriptionCommunities.includes(id)) {
-      user.subscriptionCommunities = user.subscriptionCommunities.filter(
-        (s) => s !== id,
-      );
-    } else user.subscriptionCommunities.push(id);
-    await user.save();
-    return new UserEntity(user);
+      return await this.userModel
+        .findByIdAndUpdate(
+          userId,
+          {
+            $pull: { subscriptionCommunities: id },
+          },
+          { new: true },
+        )
+        .select({ subscriptionCommunities: 1 });
+    } else
+      return await this.userModel
+        .findByIdAndUpdate(
+          userId,
+          {
+            $push: { subscriptionCommunities: id },
+          },
+          { new: true },
+        )
+        .select({ subscriptionCommunities: 1 });
   }
 
-  async subscribeBlog(id: ObjectId, userId: ObjectId) {
+  async subscription(id: ObjectId, userId: ObjectId) {
     const user = await this.userModel.findById(userId);
     if (user.subscriptionBlogs.includes(id)) {
-      user.subscriptionBlogs = user.subscriptionBlogs.filter((s) => s !== id);
-    } else user.subscriptionBlogs.push(id);
-    await user.save();
-    return new UserEntity(user);
+      await this.userModel.findByIdAndUpdate(id, {
+        $pull: { subscribers: userId },
+      });
+      return await this.userModel
+        .findByIdAndUpdate(
+          userId,
+          {
+            $pull: { subscriptionBlogs: id },
+          },
+          { new: true },
+        )
+        .select({ subscriptionBlogs: 1 });
+    } else {
+      await this.userModel.findByIdAndUpdate(id, {
+        $push: { subscribers: userId },
+      });
+      return await this.userModel
+        .findByIdAndUpdate(
+          userId,
+          {
+            $push: { subscriptionBlogs: id },
+          },
+          { new: true },
+        )
+        .select({ subscriptionBlogs: 1 });
+    }
   }
 
   async update(id: ObjectId, dto: UpdateUserDto) {

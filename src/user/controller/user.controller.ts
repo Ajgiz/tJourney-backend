@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongodb';
 import { UserService } from '../service/user.service';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import {
@@ -12,14 +13,15 @@ import {
   UseFilters,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 import { CustomExceptionFilter } from '../../exception/custom-exception';
 import { IsObjectIdParam } from '../../custom-decorators/validation-mongoose.object-id.decorator';
-import { MongoId } from '../../mongoose.interface';
 import { JwtAuthGuard } from '../../auth/guards/jwt-guards';
 import { Request } from 'express';
 import { GetUser } from 'src/custom-decorators/get-user.decorator';
 import { IJwtData } from 'src/auth/strategies/jwt-strategy';
+import { GetUsersRatingDto } from '../dto/get-rating-users';
 
 @UseFilters(CustomExceptionFilter)
 @Controller('user')
@@ -37,10 +39,9 @@ export class UserController {
     return this.userService.getMe(user._id);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('me/subscribe')
-  async getSubscribeBlogs(@GetUser() user: IJwtData) {
-    return await this.userService.getSubscribeBlogs(user._id);
+  @Get('subscriptions-blogs/:id')
+  async getSubscriptionsOnBlogs(@IsObjectIdParam() id: ObjectId) {
+    return await this.userService.getSubscriptionsOnBlogs(id);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -56,8 +57,22 @@ export class UserController {
     return this.userService.deleteOne(req.user._id);
   }
 
+  @Get('users-rating')
+  async getUsersRating(@Query() dto: GetUsersRatingDto) {
+    return await this.userService.getUsersRating(dto.period);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('subscription/:id')
+  async subscription(
+    @IsObjectIdParam() id: ObjectId,
+    @GetUser() user: IJwtData,
+  ) {
+    return await this.userService.subscription(id, user._id);
+  }
+
   @Get(':id')
-  findOne(@IsObjectIdParam() id: MongoId) {
+  findOne(@IsObjectIdParam() id: ObjectId) {
     return this.userService.findById(id);
   }
 }

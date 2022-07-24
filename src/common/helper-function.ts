@@ -1,3 +1,4 @@
+import { PeriodRatingType } from './../user/dto/get-rating-users';
 import { ObjectId } from 'mongodb';
 import { CommunityEntity } from './../community/entity/community.entity';
 import { CommentModel } from 'src/comment/model/comment.model';

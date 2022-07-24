@@ -25,6 +25,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-guards';
 import { GetUser } from 'src/custom-decorators/get-user.decorator';
 import { IJwtData } from 'src/auth/strategies/jwt-strategy';
 import { CheckIsAuth } from 'src/custom-decorators/check-is-auth.decorator';
+import { GetPostsFromFeedDto } from '../dto/get-posts-from-feed.dto';
 
 @UseFilters(CustomExceptionFilter)
 @Controller('post')
@@ -44,6 +45,15 @@ export class PostController {
     return this.postService.getNewPosts();
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('posts-feed')
+  async getPostsFromFeed(
+    @Query() dto: GetPostsFromFeedDto,
+    @GetUser() user: IJwtData,
+  ) {
+    return await this.postService.getPostsFromFeed(dto, user._id);
+  }
+
   @Get('search')
   @HttpCode(200)
   search(@Query() dto: SearchPostDto) {
@@ -59,6 +69,11 @@ export class PostController {
   @Delete('clean')
   clean() {
     return this.postService.clean();
+  }
+
+  @Get('person/:id')
+  async getPostsPerson(@IsObjectIdParam() id: ObjectId) {
+    return await this.postService.getPostsPerson(id);
   }
 
   @UseGuards(JwtAuthGuard)

@@ -37,6 +37,11 @@ export class CommentService {
     return comments[0];
   }
 
+  async getUserComments(id: ObjectId) {
+    const comments = await this.commentModel.find({ user: id });
+    return createClassesObject(CommentEntity, comments);
+  }
+
   async setLike(userId: ObjectId, id: ObjectId) {
     let comment = await this.commentModel.findById(id);
     if (!comment.likes.includes(userId)) {

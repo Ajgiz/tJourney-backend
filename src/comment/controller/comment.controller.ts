@@ -40,7 +40,6 @@ export class CommentController {
   @Get('find')
   @HttpCode(200)
   findAll(@Query() searchDto: GetCommentsDto) {
-    console.log('HERE', searchDto);
     return this.commentService.findAll(searchDto);
   }
 
@@ -55,6 +54,12 @@ export class CommentController {
   @HttpCode(200)
   setLike(@GetUser() user: IJwtData, @Body() dto: UpdateLikesDto) {
     return this.commentService.setLike(user._id, dto.id);
+  }
+
+  @Get('user/comments/:id')
+  @HttpCode(200)
+  async getUserComments(@IsObjectIdParam() id: ObjectId) {
+    return await this.commentService.getUserComments(id);
   }
 
   @UseGuards(JwtAuthGuard)

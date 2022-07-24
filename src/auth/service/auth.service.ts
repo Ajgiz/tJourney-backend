@@ -31,7 +31,10 @@ export class AuthService {
       refreshToken: refreshToken.refreshToken,
       accessToken: tokens.accessToken,
       fullName: data.fullName,
+      id: data.id,
       email: data.email,
+      subscriptionBlogs: data.subscriptionBlogs,
+      subscriptionCommunities: data.subscriptionCommunities,
     };
   }
 
@@ -55,6 +58,8 @@ export class AuthService {
       email: user.email,
       id: user._id,
       fullName: user.fullName,
+      subscriptionBlogs: user.subscriptionBlogs,
+      subscriptionCommunities: user.subscriptionCommunities,
     };
 
     return this.extraditionResponse(payload);
@@ -70,10 +75,13 @@ export class AuthService {
     const user = await this.userService.findById(isValidToken.id);
     if (!user)
       throw new ApiError(401, ['usernot exist'], TYPE_ERROR.UNAUTHORIZED);
+
     return await this.extraditionResponse({
       email: user.email,
       fullName: user.fullName,
       id: user._id,
+      subscriptionBlogs: user.subscriptionBlogs,
+      subscriptionCommunities: user.subscriptionCommunities,
     });
   }
 
@@ -100,7 +108,6 @@ export class AuthService {
     const hash = data.password ? await bcrypt.hash(data.password, salt) : null;
 
     const newUser = await this.userService.create({
-      //контролируем какие данные надо для создания пользователя
       email: data.email,
       fullName: data.fullName,
       password: hash,
@@ -110,6 +117,8 @@ export class AuthService {
       email: newUser.email,
       id: newUser._id,
       fullName: newUser.fullName,
+      subscriptionBlogs: newUser.subscriptionBlogs,
+      subscriptionCommunities: newUser.subscriptionCommunities,
     };
 
     return this.extraditionResponse(payload);

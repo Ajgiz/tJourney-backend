@@ -13,6 +13,7 @@ export class UserEntity {
   subscribers: ObjectId[];
   description: string;
   cover: string;
+  rating: number;
 
   constructor(obj: UserModel & { _id: ObjectId }) {
     this.avatar = obj.avatar;
@@ -24,6 +25,7 @@ export class UserEntity {
     this.subscribers = obj.subscribers;
     this.subscriptionBlogs = obj.subscriptionBlogs;
     this.subscriptionCommunities = obj.subscriptionCommunities;
+    this.rating = obj.rating;
   }
 }
 

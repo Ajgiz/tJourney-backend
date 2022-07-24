@@ -35,7 +35,7 @@ export class CommunityService {
     ) as CommunityEntity[];
   }
 
-  async getSubscribeCommunity(userId: ObjectId) {
+  async getSubscriptionsOnCommunity(userId: ObjectId) {
     const subscriberCommunities = await this.communityModel.find({
       subscribers: { $in: [userId] },
     });
@@ -62,8 +62,6 @@ export class CommunityService {
       .find(queryParams)
       .skip(dto.skip)
       .limit(dto.limit);
-    if (!communities)
-      throw new ApiError(404, ['communities not found'], TYPE_ERROR.NOT_FOUND);
 
     return createClassesObject(
       CommunityEntity,
@@ -71,16 +69,32 @@ export class CommunityService {
     ) as CommunityEntity[];
   }
 
-  async subscribe(id: ObjectId, userId: ObjectId) {
+  async subsciption(id: ObjectId, userId: ObjectId) {
     const community = await this.communityModel.findById(id);
     if (!community)
       throw new ApiError(404, ['community not found'], TYPE_ERROR.NOT_FOUND);
-    if (community.subscribers.includes(id)) {
-      community.subscribers = community.subscribers.filter((s) => s !== userId);
-    } else community.subscribers.push(userId);
-    await community.save();
-    await this.userService.subscribeCommunity(id, userId);
-    return new CommunityEntity(community);
+
+    if (community.subscribers.includes(userId)) {
+      await this.communityModel
+        .findByIdAndUpdate(
+          id,
+          {
+            $pull: { subscribers: userId },
+          },
+          { new: true },
+        )
+        .select({ subscribers: 1 });
+    } else
+      await this.communityModel
+        .findByIdAndUpdate(
+          id,
+          {
+            $push: { subscribers: userId },
+          },
+          { new: true },
+        )
+        .select({ subscribers: 1 });
+    return await this.userService.subscriptionOnCommunity(id, userId);
   }
 
   async findById(id: ObjectId) {

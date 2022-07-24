@@ -21,6 +21,7 @@ import { IPostModels } from './post-service.interface';
 import { JwtService } from '@nestjs/jwt';
 import { CONFIG_AUTH } from 'src/auth/auth.config';
 import { IJwtData } from 'src/auth/strategies/jwt-strategy';
+import { GetPostsFromFeedDto } from '../dto/get-posts-from-feed.dto';
 
 @Injectable()
 export class PostService {
@@ -51,7 +52,7 @@ export class PostService {
     });
   }
 
-  async collectFullPosts(posts: IPostModels[]) {
+  private async collectFullPosts(posts: IPostModels[]) {
     for (const post of posts) {
       const author = await this.userService.findById(post.author);
       if (post.topic) {
@@ -100,24 +101,52 @@ export class PostService {
     if (dto.title) queryParams.title = { $regex: dto.title, $options: 'i' };
     if (dto.body) queryParams.body = { $regex: dto.body, $options: 'i' };
     if (dto.tags) queryParams.tags = { $regex: dto.tags, $options: 'i' };
-    console.log(dto);
-    console.log(queryParams);
     const posts = await this.postModel
       .find(queryParams)
       .limit(dto.limit)
       .skip(dto.skip)
       .sort(sortParams);
 
-    if (!posts)
-      throw new ApiError(404, ['posts not found'], TYPE_ERROR.NOT_FOUND);
-
     return await this.collectFullPosts(posts);
+  }
+
+  async getPostsPerson(id: ObjectId) {
+    const posts = await this.postModel.find({ author: id }).sort({ _id: -1 });
+    if (!posts.length) return [];
+    return this.collectFullPosts(posts);
   }
 
   async getPopularPosts() {
     const posts = await this.postModel.find().sort({ views: -1 });
     if (!posts)
       throw new ApiError(404, ['posts not found'], TYPE_ERROR.NOT_FOUND);
+    return await this.collectFullPosts(posts);
+  }
+
+  async getPostsFromFeed(dto: GetPostsFromFeedDto, id: ObjectId) {
+    const sortParams: { [key: string]: any } = {};
+    const user = await this.userService.findOne({ _id: id });
+    if (!user)
+      throw new ApiError(404, ['user not found'], TYPE_ERROR.NOT_FOUND);
+    if (dto.popular) {
+      sortParams.views = dto.popular; //1 или -1
+    }
+    if (dto.new) {
+      sortParams.$natural = dto.new;
+    }
+    console.log(user);
+    const posts = await this.postModel
+      .find({
+        $or: [
+          { author: { $in: user.subscriptionBlogs } },
+          { topic: { $in: user.subscriptionCommunities } },
+        ],
+        $nor: [{ author: user._id }],
+      })
+
+      .sort(sortParams)
+      .skip(dto.skip)
+      .limit(dto.limit);
     return await this.collectFullPosts(posts);
   }
 
@@ -179,7 +208,7 @@ export class PostService {
     return getInfoLikesAndDislikes(post);
   }
 
-  async validateToken(token: string) {
+  private async validateToken(token: string) {
     try {
       return await this.jwtService.verifyAsync(token, {
         secret: CONFIG_AUTH.ACCESS_JWT_SECRET_KEY,
@@ -189,7 +218,11 @@ export class PostService {
     }
   }
 
-  async incrementViews(userId: ObjectId, views: ObjectId[], postId: ObjectId) {
+  private async incrementViews(
+    userId: ObjectId,
+    views: ObjectId[],
+    postId: ObjectId,
+  ) {
     if (!views.includes(userId)) {
       return (
         await this.postModel.findByIdAndUpdate(postId, {

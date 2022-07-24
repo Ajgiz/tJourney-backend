@@ -4,7 +4,11 @@ import mongoose from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 export type CommentModelDocument = Document & CommentModel;
-@Schema({ collection: NAME_MODEL_ENUM.COMMENT, timestamps: true })
+@Schema({
+  collection: NAME_MODEL_ENUM.COMMENT,
+  timestamps: true,
+  autoIndex: false,
+})
 export class CommentModel {
   @Prop()
   text: string;

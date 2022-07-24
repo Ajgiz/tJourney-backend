@@ -15,12 +15,14 @@ export class CustomExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
     console.log(exception);
-    response.status(status).send({
+    const responseClient = {
       enterData: request.body,
       statusCode: status,
       message: exception.response,
       timestamp: getTime(),
       path: request.url,
-    });
+    };
+    console.log(responseClient);
+    response.status(status).send(responseClient);
   }
 }

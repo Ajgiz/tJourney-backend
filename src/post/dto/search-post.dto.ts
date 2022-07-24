@@ -6,7 +6,7 @@ import {
   IsString,
 } from 'class-validator';
 
-enum SORT_ENUM {
+export enum SORT_POSTS_ENUM {
   DESC = 1,
   ASC = -1,
 }
@@ -20,7 +20,7 @@ export class SearchPostDto {
   body?: string;
 
   @IsOptional()
-  @IsEnum(SORT_ENUM)
+  @IsEnum(SORT_POSTS_ENUM)
   views?: 1 | -1;
 
   @IsOptional()
@@ -34,6 +34,6 @@ export class SearchPostDto {
   skip: number;
 
   @IsBoolean()
-  @IsEnum(SORT_ENUM)
+  @IsEnum(SORT_POSTS_ENUM)
   new?: 1 | -1;
 }
