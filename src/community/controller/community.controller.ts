@@ -20,6 +20,7 @@ import { GetUser } from 'src/custom-decorators/get-user.decorator';
 import { IJwtData } from 'src/auth/strategies/jwt-strategy';
 import { SubscribeCommunityDto } from '../dto/subscribe-community.dto';
 import { IsObjectIdParam } from 'src/custom-decorators/validation-mongoose.object-id.decorator';
+import { GetRatingsDto } from 'src/user/dto/get-rating-users';
 
 @UseFilters(CustomExceptionFilter)
 @Controller('communities')
@@ -37,6 +38,11 @@ export class CommunityController {
   @Get('search')
   async search(@Query() dto: SearchCommunityDto) {
     return await this.communityService.search(dto);
+  }
+
+  @Get('ratings')
+  async getRating(@Query() dto: GetRatingsDto) {
+    return await this.communityService.getRatings(dto.period);
   }
 
   @UseGuards(JwtAuthGuard)

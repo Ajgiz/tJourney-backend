@@ -21,7 +21,7 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-guards';
 import { Request } from 'express';
 import { GetUser } from 'src/custom-decorators/get-user.decorator';
 import { IJwtData } from 'src/auth/strategies/jwt-strategy';
-import { GetUsersRatingDto } from '../dto/get-rating-users';
+import { GetRatingsDto } from '../dto/get-rating-users';
 
 @UseFilters(CustomExceptionFilter)
 @Controller('user')
@@ -57,9 +57,9 @@ export class UserController {
     return this.userService.deleteOne(req.user._id);
   }
 
-  @Get('users-rating')
-  async getUsersRating(@Query() dto: GetUsersRatingDto) {
-    return await this.userService.getUsersRating(dto.period);
+  @Get('ratings')
+  async getRating(@Query() dto: GetRatingsDto) {
+    return await this.userService.getRatings(dto.period);
   }
 
   @UseGuards(JwtAuthGuard)

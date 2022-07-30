@@ -7,7 +7,7 @@ enum RATING_PERIOD_ENUM {
 }
 export type PeriodRatingType = 'month' | 'three-month' | 'all-time';
 
-export class GetUsersRatingDto {
+export class GetRatingsDto {
   @IsEnum(RATING_PERIOD_ENUM)
   period: PeriodRatingType;
 }

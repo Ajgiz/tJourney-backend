@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { TokenService } from './service/token.service';
 import { TokenModel, TokenModelSchema } from './model/token.model';
+import { NAME_MODEL_ENUM } from 'src/mongoose.interface';
 
 @Module({
   controllers: [],
@@ -10,7 +11,7 @@ import { TokenModel, TokenModelSchema } from './model/token.model';
     JwtModule.register({}),
     MongooseModule.forFeature([
       {
-        name: TokenModel.name,
+        name: NAME_MODEL_ENUM.TOKEN,
         schema: TokenModelSchema,
       },
     ]),

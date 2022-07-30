@@ -22,11 +22,12 @@ import { JwtService } from '@nestjs/jwt';
 import { CONFIG_AUTH } from 'src/auth/auth.config';
 import { IJwtData } from 'src/auth/strategies/jwt-strategy';
 import { GetPostsFromFeedDto } from '../dto/get-posts-from-feed.dto';
+import { NAME_MODEL_ENUM } from 'src/mongoose.interface';
 
 @Injectable()
 export class PostService {
   constructor(
-    @InjectModel(PostModel.name)
+    @InjectModel(NAME_MODEL_ENUM.POST)
     private readonly postModel: Model<PostModelDocument>,
     private readonly userService: UserService,
     private readonly communityService: CommunityService,
@@ -38,6 +39,10 @@ export class PostService {
     const post = await this.postModel.create({ ...dto, author: id });
     if (!post)
       throw new ApiError(500, ['post not created'], TYPE_ERROR.INTERNAL_SERVER);
+
+    if (post.topic) await this.communityService.changeRating(post.topic, 'low');
+
+    await this.userService.changeRating(id, 'low');
     return new PostEntity({
       _id: post.id,
       title: post.title,
@@ -50,6 +55,13 @@ export class PostService {
       topic: post.topic,
       views: post.views,
     });
+  }
+
+  async incrementRating(id: ObjectId) {
+    await this.userService.changeRating(id, 'low');
+    return {
+      success: true,
+    };
   }
 
   private async collectFullPosts(posts: IPostModels[]) {
@@ -134,7 +146,6 @@ export class PostService {
     if (dto.new) {
       sortParams.$natural = dto.new;
     }
-    console.log(user);
     const posts = await this.postModel
       .find({
         $or: [
@@ -171,6 +182,9 @@ export class PostService {
         },
         { new: true },
       );
+      await this.userService.changeRating(userId, 'middle');
+      if (post.topic)
+        await this.communityService.changeRating(post.topic, 'middle');
     } else {
       post = await this.postModel.findByIdAndUpdate(
         postId,
@@ -181,6 +195,9 @@ export class PostService {
           new: true,
         },
       );
+      if (post.topic)
+        await this.communityService.changeRating(post.topic, 'middle', true);
+      await this.userService.changeRating(userId, 'middle', true);
     }
     return getInfoLikesAndDislikes(post);
   }
@@ -195,6 +212,9 @@ export class PostService {
         },
         { new: true },
       );
+      await this.userService.changeRating(userId, 'middle');
+      if (post.topic)
+        await this.communityService.changeRating(post.topic, 'middle');
     } else {
       post = await this.postModel.findByIdAndUpdate(
         postId,
@@ -204,6 +224,9 @@ export class PostService {
         },
         { new: true },
       );
+      await this.userService.changeRating(userId, 'middle', true);
+      if (post.topic)
+        await this.communityService.changeRating(post.topic, 'middle', true);
     }
     return getInfoLikesAndDislikes(post);
   }
@@ -223,7 +246,11 @@ export class PostService {
     views: ObjectId[],
     postId: ObjectId,
   ) {
+    const post = await this.postModel.findById(postId);
     if (!views.includes(userId)) {
+      await this.userService.changeRating(post.author, 'low');
+      if (post.topic)
+        await this.communityService.changeRating(post.topic, 'low');
       return (
         await this.postModel.findByIdAndUpdate(postId, {
           $push: { views: userId },

@@ -16,12 +16,15 @@ import { TYPE_ERROR } from '../../error/custom-error.interface';
 import { ICommentModels, IFindOneComment } from './comment-service.interface';
 import { GetCommentsDto } from '../dto/get-comments.dto';
 import { UserService } from 'src/user/service/user.service';
+import { CommunityService } from 'src/community/service/community.service';
+import { NAME_MODEL_ENUM } from 'src/mongoose.interface';
 
 @Injectable()
 export class CommentService {
   constructor(
-    @InjectModel(CommentModel.name)
+    @InjectModel(NAME_MODEL_ENUM.COMMENT)
     private commentModel: Model<CommentModelDocument>,
+    private communityService: CommunityService,
     private userService: UserService,
   ) {}
 
@@ -34,6 +37,7 @@ export class CommentService {
         TYPE_ERROR.INTERNAL_SERVER,
       );
     const comments = await this.getFullComments([comment]);
+    await this.userService.changeRating(user, 'low');
     return comments[0];
   }
 
@@ -53,6 +57,7 @@ export class CommentService {
         },
         { new: true },
       );
+      await this.userService.changeRating(userId, 'middle');
     } else {
       comment = await this.commentModel.findByIdAndUpdate(
         id,
@@ -63,6 +68,7 @@ export class CommentService {
           new: true,
         },
       );
+      await this.userService.changeRating(userId, 'middle', true);
     }
     return getInfoLikesAndDislikes(comment);
   }
@@ -77,6 +83,7 @@ export class CommentService {
         },
         { new: true },
       );
+      await this.userService.changeRating(userId, 'middle', true);
     } else {
       comment = await this.commentModel.findByIdAndUpdate(
         id,
@@ -86,6 +93,7 @@ export class CommentService {
         },
         { new: true },
       );
+      await this.userService.changeRating(userId, 'middle');
     }
     return getInfoLikesAndDislikes(comment);
   }

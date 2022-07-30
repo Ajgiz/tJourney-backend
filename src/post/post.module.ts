@@ -7,13 +7,14 @@ import { PostService } from './service/post.service';
 import { PostController } from './controller/post.controller';
 import { PostModel, PostModelSchema } from './model/post.model';
 import { JwtModule } from '@nestjs/jwt';
+import { NAME_MODEL_ENUM } from 'src/mongoose.interface';
 
 @Module({
   controllers: [PostController],
   providers: [PostService],
   imports: [
     MongooseModule.forFeature([
-      { name: PostModel.name, schema: PostModelSchema },
+      { name: NAME_MODEL_ENUM.POST, schema: PostModelSchema },
     ]),
     CommunityModule,
     UserModule,

@@ -2,6 +2,7 @@ import { IPersonInfo } from 'src/post/service/post-service.interface';
 import { UserModel } from '../model/user.model';
 import { ObjectId } from 'mongodb';
 import { ISubscribesInfo } from '../service/user-service.interface';
+import { IRatingStatistics } from '../model/user.interface';
 
 export class UserEntity {
   fullName: string;
@@ -13,7 +14,7 @@ export class UserEntity {
   subscribers: ObjectId[];
   description: string;
   cover: string;
-  rating: number;
+  rating: IRatingStatistics;
 
   constructor(obj: UserModel & { _id: ObjectId }) {
     this.avatar = obj.avatar;

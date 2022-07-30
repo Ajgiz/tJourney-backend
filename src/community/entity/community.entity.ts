@@ -1,3 +1,4 @@
+import { IRatingStatistics } from './../../user/model/user.interface';
 import { ObjectId } from 'mongodb';
 import { CommunityModel } from '../model/community.model';
 
@@ -8,6 +9,8 @@ export class CommunityEntity {
   subscribers: ObjectId[];
   avatar?: string;
   author: ObjectId;
+  rating: IRatingStatistics;
+
   _id: ObjectId;
   constructor(obj: CommunityModel & { _id: ObjectId }) {
     this.avatar = obj.avatar;
@@ -17,5 +20,6 @@ export class CommunityEntity {
     this.title = obj.title;
     this.author = obj.author;
     this._id = obj._id;
+    this.rating = obj.rating;
   }
 }

@@ -4,6 +4,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CommunityService } from './service/community.service';
 import { CommunityController } from './controller/community.controller';
+import { NAME_MODEL_ENUM } from 'src/mongoose.interface';
 
 @Module({
   controllers: [CommunityController],
@@ -11,7 +12,7 @@ import { CommunityController } from './controller/community.controller';
   exports: [CommunityService],
   imports: [
     MongooseModule.forFeature([
-      { name: CommunityModel.name, schema: CommunityModelSchema },
+      { name: NAME_MODEL_ENUM.COMMUNITY, schema: CommunityModelSchema },
     ]),
     UserModule,
   ],

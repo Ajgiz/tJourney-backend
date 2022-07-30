@@ -8,12 +8,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { TokenEntity } from '../entity/token.entity';
 import { ObjectId } from 'mongodb';
+import { NAME_MODEL_ENUM } from 'src/mongoose.interface';
 
 @Injectable()
 export class TokenService {
   constructor(
     private jwtService: JwtService,
-    @InjectModel(TokenModel.name) private tokenModel: Model<TokenModelDocument>,
+    @InjectModel(NAME_MODEL_ENUM.TOKEN)
+    private tokenModel: Model<TokenModelDocument>,
   ) {}
   async createTokens(dto: IPayloadJwt) {
     const accessToken = this.jwtService.sign(dto, {

@@ -1,3 +1,4 @@
+import { ChatModule } from './chat/chat.module';
 import { DatabaseModule } from './database/database.module';
 import { ConfigModule } from '@nestjs/config';
 import { CommentModule } from './comment/comment.module';
@@ -19,6 +20,7 @@ import { CommunityModule } from './community/community.module';
       isGlobal: true,
     }),
     DatabaseModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -46,6 +46,14 @@ export class PostController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @UsePipes(CustomValidationPipe)
+  @Patch('increment-rating')
+  @HttpCode(200)
+  updateRating(@Body() dto: UpdateLikesDto) {
+    return this.postService.incrementRating(dto.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get('posts-feed')
   async getPostsFromFeed(
     @Query() dto: GetPostsFromFeedDto,

@@ -11,4 +11,6 @@ export enum NAME_MODEL_ENUM {
   POST = 'posts',
   COMMENT = 'comments',
   TOKEN = 'tokens',
+  CHAT = 'chats',
+  MESSAGE = 'messages',
 }

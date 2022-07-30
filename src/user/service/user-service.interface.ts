@@ -9,3 +9,5 @@ export interface IFindOneUser {
 export interface ISubscribesInfo extends IPersonInfo {
   _id: ObjectId;
 }
+
+export type LevelIncrementRating = 'low' | 'middle' | 'high';
